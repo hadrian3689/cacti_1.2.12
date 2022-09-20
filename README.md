@@ -1,10 +1,8 @@
-# Project Title
+# Cacti 1.2.12 - 'filter' SQL Injection / Remote Code Execution 
 
-Cacti 1.2.12 - 'filter' SQL Injection / Remote Code Execution 
+Remote Code Exectuion of Cacti 1.2.12 using Python
 
-## Description
-
-Remote Code Exectuion of Cacti using Python
+## Getting Started
 
 ### Executing program
 
